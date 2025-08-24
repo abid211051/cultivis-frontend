@@ -1,103 +1,244 @@
-import Image from "next/image";
+"use client";
+import React, { useState, useRef } from "react";
+import { m_p_d } from "../lib/globalVariabale";
 
-export default function Home() {
+const DraggableTodoList = () => {
+  const [todos, setTodos] = useState([
+    { id: 1, text: "Complete project documentation", completed: false },
+    { id: 2, text: "Review code changes", completed: false },
+    { id: 3, text: "Update dependencies", completed: true },
+    { id: 4, text: "Fix responsive design issues", completed: false },
+    { id: 5, text: "Deploy to production", completed: false },
+  ]);
+
+  const [newTodo, setNewTodo] = useState("");
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [dragOverItem, setDragOverItem] = useState(null);
+
+  const dragCounter = useRef(0);
+
+  const addTodo = () => {
+    if (newTodo.trim()) {
+      setTodos([
+        ...todos,
+        {
+          id: Date.now(),
+          text: newTodo,
+          completed: false,
+        },
+      ]);
+      setNewTodo("");
+    }
+  };
+
+  const toggleTodo = (id) => {
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+
+  const deleteTodo = (id) => {
+    setTodos(todos.filter((todo) => todo.id !== id));
+  };
+
+  const handleDragStart = (e, item) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/html", e.target.outerHTML);
+    e.dataTransfer.setDragImage(e.target, 0, 0);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDragEnter = (e, item) => {
+    e.preventDefault();
+    dragCounter.current++;
+    if (item.id !== draggedItem?.id) {
+      setDragOverItem(item);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setDragOverItem(null);
+    }
+  };
+
+  const handleDrop = (e, dropItem) => {
+    e.preventDefault();
+    dragCounter.current = 0;
+
+    if (draggedItem && draggedItem.id !== dropItem.id) {
+      const draggedIndex = todos.findIndex(
+        (item) => item.id === draggedItem.id
+      );
+      const dropIndex = todos.findIndex((item) => item.id === dropItem.id);
+
+      const newTodos = [...todos];
+      // Swap the items instead of just inserting
+      [newTodos[draggedIndex], newTodos[dropIndex]] = [
+        newTodos[dropIndex],
+        newTodos[draggedIndex],
+      ];
+
+      setTodos(newTodos);
+    }
+
+    setDraggedItem(null);
+    setDragOverItem(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverItem(null);
+    dragCounter.current = 0;
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className={`${m_p_d} bg-white rounded-lg shadow-lg`}>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+        Draggable Todo List
+      </h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      {/* Add Todo Form */}
+      <div className="flex mb-6">
+        <input
+          type="text"
+          value={newTodo}
+          onChange={(e) => setNewTodo(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && addTodo()}
+          placeholder="Add a new todo..."
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button
+          onClick={addTodo}
+          className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+        >
+          Add
+        </button>
+      </div>
+
+      {/* Todo List */}
+      <div className="space-y-2">
+        {todos.map((todo) => (
+          <div
+            key={todo.id}
+            draggable
+            onDragStart={(e) => handleDragStart(e, todo)}
+            onDragOver={handleDragOver}
+            onDragEnter={(e) => handleDragEnter(e, todo)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, todo)}
+            onDragEnd={handleDragEnd}
+            className={`
+              flex items-center p-3 bg-gray-50 rounded-md border-2 cursor-move transition-all duration-200 ease-in-out
+              ${
+                draggedItem?.id === todo.id
+                  ? "opacity-50 scale-105 shadow-lg transform rotate-1"
+                  : ""
+              }
+              ${
+                dragOverItem?.id === todo.id
+                  ? "border-blue-400 bg-blue-50 scale-102 shadow-md"
+                  : "border-transparent"
+              }
+              hover:bg-gray-100 hover:shadow-sm active:scale-98
+            `}
+            style={{
+              transform:
+                draggedItem?.id === todo.id
+                  ? "rotate(2deg) scale(1.02)"
+                  : dragOverItem?.id === todo.id
+                  ? "scale(1.02)"
+                  : "scale(1)",
+              transition: "all 0.2s ease-in-out",
+              boxShadow:
+                draggedItem?.id === todo.id
+                  ? "0 8px 25px rgba(0,0,0,0.15)"
+                  : dragOverItem?.id === todo.id
+                  ? "0 4px 12px rgba(59,130,246,0.15)"
+                  : "",
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            {/* Drag Handle */}
+            <div className="mr-3 text-gray-400 cursor-move">
+              <svg
+                width="12"
+                height="16"
+                viewBox="0 0 12 16"
+                fill="currentColor"
+              >
+                <circle cx="2" cy="2" r="1" />
+                <circle cx="6" cy="2" r="1" />
+                <circle cx="10" cy="2" r="1" />
+                <circle cx="2" cy="6" r="1" />
+                <circle cx="6" cy="6" r="1" />
+                <circle cx="10" cy="6" r="1" />
+                <circle cx="2" cy="10" r="1" />
+                <circle cx="6" cy="10" r="1" />
+                <circle cx="10" cy="10" r="1" />
+                <circle cx="2" cy="14" r="1" />
+                <circle cx="6" cy="14" r="1" />
+                <circle cx="10" cy="14" r="1" />
+              </svg>
+            </div>
+
+            {/* Checkbox */}
+            <input
+              type="checkbox"
+              checked={todo.completed}
+              onChange={() => toggleTodo(todo.id)}
+              className="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+
+            {/* Todo Text */}
+            <span
+              className={`flex-1 ${
+                todo.completed ? "line-through text-gray-500" : "text-gray-800"
+              } transition-colors duration-200`}
+            >
+              {todo.text}
+            </span>
+
+            {/* Delete Button */}
+            <button
+              onClick={() => deleteTodo(todo.id)}
+              className="ml-2 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors duration-200"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+              >
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                <path
+                  fillRule="evenodd"
+                  d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
+                />
+              </svg>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {todos.length === 0 && (
+        <div className="text-center text-gray-500 py-8">
+          No todos yet. Add one above!
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+
+      <div className="mt-6 text-sm text-gray-500 text-center">
+        Drag and drop to reorder items
+      </div>
     </div>
   );
-}
+};
+
+export default DraggableTodoList;
