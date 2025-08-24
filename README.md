@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -44,3 +45,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-redux": "^9.2.0",
+=======
+# cultivis_frontend
+>>>>>>> db16a7890ee34add8dc1fa77e1526cfcc9e2d706
