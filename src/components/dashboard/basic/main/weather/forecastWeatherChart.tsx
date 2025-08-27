@@ -15,7 +15,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/src/components/ui/chart";
-import { Area, AreaChart, LabelList, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  LabelList,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   Clock,
   Calendar,
@@ -24,6 +31,7 @@ import {
   TrendingUpDown,
 } from "lucide-react";
 import { useState } from "react";
+import { weatherdivHeight } from "./weatherConfig";
 
 const config = {
   temperature: { label: "Temp(°C)", color: "var(--chart-1)" },
@@ -91,7 +99,9 @@ export default function ForecastWeather() {
   };
 
   return (
-    <div className="bg-dark-surface shadow-xl rounded-2xl p-3 lg:max-h-full max-h-[350px] overflow-hidden">
+    <div
+      className={`bg-dark-surface shadow-xl rounded-2xl p-3 ${weatherdivHeight} overflow-hidden`}
+    >
       <div className="flex flex-col overflow-x-auto  gap-3 justify-between h-full overflow-y-scroll scrollbar-hide rounded-md">
         <Heading text={"Forecast"} Icon={TrendingUpDown}>
           <div className="flex gap-2">
@@ -143,7 +153,7 @@ export default function ForecastWeather() {
 
         <ChartContainer
           config={config}
-          className="overflow-x-auto scrollbar-hide"
+          className="h-[70%] aspect-auto w-full overflow-x-auto scrollbar-hide"
         >
           <AreaChart
             accessibilityLayer
@@ -152,7 +162,8 @@ export default function ForecastWeather() {
           >
             <YAxis
               dataKey={dataValue}
-              width={22}
+              width={20}
+              minTickGap={20}
               tickFormatter={(value, index) => {
                 const v = Number(value);
                 return `${value}`.includes(".") ? `${v.toFixed(1)}` : `${v}`;
@@ -160,7 +171,9 @@ export default function ForecastWeather() {
             />
             <XAxis
               dataKey={timeValue === "hourly" ? "time" : "day"}
+              height={24}
               tickMargin={10}
+              minTickGap={20}
               tick={({ x, y, payload }) => {
                 const [day, month] = payload.value.split(" ");
                 return (
@@ -199,11 +212,7 @@ export default function ForecastWeather() {
               stroke={`var(--color-${dataValue})`}
               stackId="temperature"
               dot
-            >
-              {dataValue === "temperature" && (
-                <LabelList position="top" offset={12} />
-              )}
-            </Area>
+            ></Area>
           </AreaChart>
         </ChartContainer>
       </div>

@@ -2,15 +2,22 @@
 
 import { ChevronRight, CloudRain, CloudSunRain } from "lucide-react";
 import Heading from "../divHeading";
+import Link from "next/link";
+import { weatherdivHeight } from "./weatherConfig";
 
 export default function WeatherOverview() {
   return (
-    <div className="bg-dark-surface shadow-xl rounded-2xl lg:max-h-full max-h-[350px] p-3">
+    <div
+      className={`bg-dark-surface shadow-xl rounded-2xl ${weatherdivHeight} p-3`}
+    >
       <div className="h-full rounded-xl overflow-y-auto flex flex-col scrollbar-hide">
         <Heading text={"Weather"} Icon={CloudSunRain}>
-          <button className="p-2 bg-dark-light rounded-full hover:bg-dark-lighter transition-colors">
+          <Link
+            href={"#"}
+            className="p-2 bg-dark-light rounded-full hover:bg-dark-lighter transition-colors"
+          >
             <ChevronRight className="size-4 text-gray-400" />
-          </button>
+          </Link>
         </Heading>
         <div className="flex-1 flex flex-col gap-3 justify-between">
           <div className="flex items-center justify-around">

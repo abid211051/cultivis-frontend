@@ -1,5 +1,6 @@
+import SoilMoisture from "./soil/soilMoistureChart";
 import TaskComponent from "./task/taskComponent";
-import ForecastWeather from "./weather/forecastWeather";
+import ForecastWeather from "./weather/forecastWeatherChart";
 import WeatherOverview from "./weather/fullWeatherOverview";
 
 export default function MainComponent() {
@@ -28,16 +29,7 @@ export default function MainComponent() {
       </div>
 
       <div className="lg:col-start-2 col-span-1 lg:row-start-6 lg:row-span-4 overflow-hidden">
-        <div className="h-full min-h-0 overflow-y-auto bg-dark-surface rounded-2xl p-3 shadow-xl">
-          <div className="text-sm text-gray-400 mb-2">Section 5</div>
-          <div className="space-y-3">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="p-3 rounded-xl bg-dark-light">
-                Entry {i + 1}
-              </div>
-            ))}
-          </div>
-        </div>
+        <SoilMoisture />
       </div>
     </>
   );

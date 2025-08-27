@@ -20,22 +20,24 @@ export default function AuthUiComponent() {
         <div className="flex-1 h-[1px] bg-gray-400"></div>
       </div>
       <div className="flex flex-wrap gap-2 justify-between">
-        <AuthButtonComponent text={"Google"}>
+        <AuthButtonComponent>
           <Image
             src={"/google.png"}
             alt="Google"
             width={25}
             height={25}
             priority
+            className="mx-auto"
           />
         </AuthButtonComponent>
-        <AuthButtonComponent text="Facebook">
+        <AuthButtonComponent>
           <Image
             src={"/facebook.png"}
             alt="Facebook"
             width={25}
             height={25}
             priority
+            className="mx-auto"
           />
         </AuthButtonComponent>
       </div>

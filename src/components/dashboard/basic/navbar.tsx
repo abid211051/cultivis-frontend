@@ -43,7 +43,7 @@ export default function BasicUserNavbar() {
   return (
     <div
       ref={mainDiv}
-      className={`absolute bg-dark-surface flex rounded-lg`}
+      className={`absolute h-fit bg-dark-light flex rounded-lg z-999 p-1.5`}
       style={
         isDragging
           ? { top: `${position?.top}px`, left: `${position?.left}px`, gap: 0 }
@@ -59,7 +59,7 @@ export default function BasicUserNavbar() {
       }
     >
       <div
-        className={`min-w-[40px] flex items-center justify-center cursor-grab`}
+        className={`p-2 flex items-center justify-center cursor-grab`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -67,11 +67,11 @@ export default function BasicUserNavbar() {
           touchAction: "none",
         }}
       >
-        <Grip />
+        <Grip className="size-5" />
       </div>
       <div
         className={`flex gap-2 overflow-x-scroll scrollbar-hide  items-center justify-between ${
-          isDragging ? "w-[0px]" : "lg:w-[750px] sm:w-[400px] w-[270px]"
+          isDragging ? "w-[0px]" : "lg:w-[700px] sm:w-[400px] w-[270px]"
         } duration-300 ease-in-out`}
       >
         <NavLink />

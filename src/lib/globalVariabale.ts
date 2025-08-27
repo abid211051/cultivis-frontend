@@ -1,1 +1,1 @@
-export const m_p_d = "xl:px-8 p-4";
+export const m_p_d = "p-4 2xl:p-6 xl:p-8";

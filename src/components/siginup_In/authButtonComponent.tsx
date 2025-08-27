@@ -8,7 +8,7 @@ const AuthButtonComponent = ({
   disabled = false,
 }: {
   children?: React.ReactNode;
-  text: string;
+  text?: string;
   disabled?: boolean;
 }) => {
   return (
@@ -21,7 +21,7 @@ const AuthButtonComponent = ({
       disabled={disabled}
     >
       {children}
-      {!disabled ? (
+      {!disabled && text ? (
         <span className="flex-1 text-center">{text}</span>
       ) : (
         <AuthLoadingComponent loading={disabled} />
