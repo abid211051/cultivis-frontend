@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import {
   Select,
   SelectContent,
@@ -15,14 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/src/components/ui/chart";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  LabelList,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Area, AreaChart, XAxis, YAxis } from "recharts";
 import {
   Clock,
   Calendar,
@@ -30,7 +22,7 @@ import {
   CloudRain,
   TrendingUpDown,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { weatherdivHeight } from "./weatherConfig";
 
 const config = {
@@ -98,11 +90,64 @@ export default function ForecastWeather() {
     rainfall: { icon: CloudRain, label: "Rainfall" },
   };
 
+  const [startIndex, setStartIndex] = useState(0);
+  const [endIndex, setEndIndex] = useState(hourlyData.length - 1);
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const data = timeValue === "hourly" ? hourlyData : weeklyData;
+
+  const MIN_WINDOW = 2;
+  const ZOOM_FACTOR = 0.2;
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (!chartRef.current) return;
+
+    const totalWindow = endIndex - startIndex + 1;
+    const rect = chartRef.current.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    const anchorIndex = startIndex + Math.floor(totalWindow * ratio);
+
+    let newWindow = totalWindow;
+
+    if (e.deltaY < 0 && totalWindow > MIN_WINDOW) {
+      newWindow = Math.max(
+        MIN_WINDOW,
+        Math.floor(totalWindow * (1 - ZOOM_FACTOR))
+      );
+    } else if (e.deltaY > 0) {
+      newWindow = Math.min(
+        data.length,
+        Math.ceil(totalWindow * (1 + ZOOM_FACTOR))
+      );
+    } else {
+      return;
+    }
+
+    let newStart = anchorIndex - Math.floor(newWindow * ratio);
+    let newEnd = newStart + newWindow - 1;
+
+    if (newStart < 0) {
+      newStart = 0;
+      newEnd = newWindow - 1;
+    }
+    if (newEnd >= data.length) {
+      newEnd = data.length - 1;
+      newStart = newEnd - newWindow + 1;
+      if (newStart < 0) newStart = 0;
+    }
+
+    setStartIndex(newStart);
+    setEndIndex(newEnd);
+  };
+
+  const visibleData = data.slice(startIndex, endIndex + 1);
+
   return (
     <div
       className={`bg-dark-surface shadow-xl rounded-2xl p-3 ${weatherdivHeight} overflow-hidden`}
     >
-      <div className="flex flex-col overflow-x-auto  gap-3 justify-between h-full overflow-y-scroll scrollbar-hide rounded-md">
+      <div className="flex flex-col gap-3 justify-between h-full">
         <Heading text={"Forecast"} Icon={TrendingUpDown}>
           <div className="flex gap-2">
             <Select value={timeValue} onValueChange={setTimeValue}>
@@ -152,19 +197,21 @@ export default function ForecastWeather() {
         </Heading>
 
         <ChartContainer
+          ref={chartRef}
           config={config}
-          className="h-[70%] aspect-auto w-full overflow-x-auto scrollbar-hide"
+          className="h-[70%] aspect-auto w-full overflow-hidden"
+          onWheel={handleWheel}
         >
           <AreaChart
             accessibilityLayer
-            data={timeValue === "hourly" ? hourlyData : weeklyData}
+            data={visibleData}
             margin={{ left: 5, right: 5, top: 25 }}
           >
             <YAxis
               dataKey={dataValue}
               width={20}
               minTickGap={20}
-              tickFormatter={(value, index) => {
+              tickFormatter={(value) => {
                 const v = Number(value);
                 return `${value}`.includes(".") ? `${v.toFixed(1)}` : `${v}`;
               }}
@@ -172,24 +219,17 @@ export default function ForecastWeather() {
             <XAxis
               dataKey={timeValue === "hourly" ? "time" : "day"}
               height={24}
-              tickMargin={10}
               minTickGap={20}
               tick={({ x, y, payload }) => {
-                const [day, month] = payload.value.split(" ");
                 return (
                   <text
                     x={x}
-                    y={y + 2}
+                    y={y + 12}
                     textAnchor="middle"
                     fill="#9ca3af"
                     fontSize={12}
                   >
-                    <tspan x={x} dy="0">
-                      {day}
-                    </tspan>
-                    <tspan x={x} dy="1em">
-                      {month}
-                    </tspan>
+                    {payload.value}
                   </text>
                 );
               }}
@@ -212,7 +252,7 @@ export default function ForecastWeather() {
               stroke={`var(--color-${dataValue})`}
               stackId="temperature"
               dot
-            ></Area>
+            />
           </AreaChart>
         </ChartContainer>
       </div>

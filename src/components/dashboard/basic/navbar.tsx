@@ -43,7 +43,7 @@ export default function BasicUserNavbar() {
   return (
     <div
       ref={mainDiv}
-      className={`absolute h-fit bg-dark-light flex rounded-lg z-999 p-1.5`}
+      className={`absolute h-fit bg-dark-light flex rounded-full z-999 p-1`}
       style={
         isDragging
           ? { top: `${position?.top}px`, left: `${position?.left}px`, gap: 0 }

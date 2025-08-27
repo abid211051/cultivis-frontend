@@ -34,7 +34,7 @@ const NavLink = () => {
         <Link
           href={link.href}
           key={i}
-          className={`lg:min-w-[90px] font-medium flex items-center justify-center gap-2 p-2.5 rounded-lg ${
+          className={`lg:min-w-[90px] font-medium flex items-center justify-center gap-2 p-2.5 rounded-full ${
             pathname === link.href && "bg-white text-black"
           }`}
         >
